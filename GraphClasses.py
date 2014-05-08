@@ -4,7 +4,7 @@
 import sys
 import pygraphviz as pgv
 from pygraphviz import *
-from PyQt4.QtGui import *  
+from PyQt4 import QtGui
 class InvalidArgError:
     pass
 
@@ -31,12 +31,11 @@ class OrientedGraph:
                 raise InvalidArgError #diagonal elements - zeros, else - error
         self.__distoparr = {} #dictionary, key - node number, value - distance
         self.__parrent = {} #dictionary, key - node number, value - parrent node
-        self.__ndict = {} #dictionary, key - node name, value - node number
-        self.i = 0
+        self.__ndict = {} #dictionary, key - node number, value - node name
+        i = 0
         for name in names:
-            self.__ndict[name] = self.i
-            self.i = self.i + 1
-        del self.i
+            self.__ndict[i] = name
+            i = i + 1
 
         
     def DijkstraAlg(self, point):
@@ -71,34 +70,55 @@ class OrientedGraph:
     def GetShortestWay(self,firstnode,lastnode):
         if firstnode == lastnode:
             t = firstnode,lastnode
-            return t
-        distlist,parlist = self.DijkstraAlg(firstnode)
-        if distlist[lastnode] == float('inf'):
+            return t #the best way to get to node b from node b is to go nowhere
+        distlist,parlist = self.DijkstraAlg(firstnode) #apply DijkstraAlgorythm
+        if distlist[lastnode] == float('inf'): #cant gat to lastnode - error
             raise BadGraphError
         else:
             currel = lastnode
-            route = [currel]
+            route = []
             while True:
+                t = parlist[currel],currel #making pairs of edges
                 currel = parlist[currel]
-                route.insert(0,currel)
-                if currel == firstnode:
+                route.insert(0,t)
+                if currel == firstnode: 
                     break
-            return tuple(route)
-            
-        
+            return tuple(route) #return the route
+
+    def VisualiseToFile(self,subgraph = (),fileloc = 'file.png',plasement = 'circo'):
+        G = pgv.AGraph(strict=True,directed=True,forcelabels = True) #pyGraphVis makes magic simple
+        nodes = [] #this list will store numbers of nodes in subgraph
+        for i in subgraph:
+            nodes.append(i[0]);
+            nodes.append(i[1]);
+        for i in range(len(self.__matrix)): #add nodes from graph
+            if i in nodes:
+                G.add_node(self.__ndict[i], style = "filled", fillcolor = "grey", color = "red", shape = "doublecircle") #fetched out if in subgraph
+            else:
+                G.add_node(self.__ndict[i], style = "filled", fillcolor = "grey", shape = "doublecircle") #not fetched out
+        for i in range(len(self.__matrix)): #add some edges
+            for j in range(len(self.__matrix)):
+                t = i,j
+                if (self.__matrix[i][j] != 0) and (t in subgraph):
+                    G.add_edge(self.__ndict[i],self.__ndict[j],label = str(self.__matrix[i][j]),color = "red" ,style = "bold") #fetched out if in subgraph
+                elif (self.__matrix[i][j] != 0):
+                    G.add_edge(self.__ndict[i],self.__ndict[j],label = str(self.__matrix[i][j])) #not fetched out
+        G.draw(fileloc,prog=plasement) #generate image
         
 
 
     
-t1 = 0,1,1,1,0,1
+t1 = 0,1,0,0,0,1
 t2 = 1,0,0,0,0,1
-t3 = 1,0,0,1,0,1
-t4 = 1,0,1,0,1,0
+t3 = 1,0,0,0,0,1
+t4 = 1,0,0,0,0,0
 t5 = 0,0,0,1,0,1
-t6 = 1,1,1,0,1,0
+t6 = 0,0,1,0,1,0
 t = t1,t2,t3,t4,t5,t6
 
-names = 'a','b','c','d','e','f'
+names = 'New York','London','Bejing','Washington','Kyiv','Odessa'
 G = OrientedGraph(t,names)
-
-            
+print G.GetShortestWay(1,3)
+G.VisualiseToFile(G.GetShortestWay(1,3))
+#filename = QtGui.QFileDialog.getOpenFileName(None, 'Open file', '/home')
+print fileName
