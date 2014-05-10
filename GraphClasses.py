@@ -45,6 +45,7 @@ class OrientedGraph:
         self.__distoparr = {} #dictionary, key - node number, value - distance
         self.__parrent = {} #dictionary, key - node number, value - parrent node
         self.__ndict = {} #dictionary, key - node number, value - node name
+        i = 0
         for name in names:
             self.__ndict[i] = name
             i = i + 1
@@ -378,4 +379,5 @@ t6 = 0,0,1,0,1,0
 t = t1,t2,t3,t4,t5,t6
 
 names = 'New York','London','Bejing','Washington','Kyiv','Odessa'
-
+G = OrientedGraph(t,names)
+G.VisualiseToFile()

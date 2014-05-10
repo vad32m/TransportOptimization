@@ -3,26 +3,61 @@ import sys
 
 class StartWindow(QtGui.QWidget):
 
-    result = None
+    callback = None
     
-    def __init__(self,parent = None):
+    def __init__(self,callback,parent = None):
         QtGui.QWidget.__init__(self, parent)
         uic.loadUi("UIForms/StartWin.ui",self)
         self.connect(self.proceedButton, QtCore.SIGNAL("clicked()"),self.proceed)
         self.setFixedSize(self.size())
         desktop = QtGui.QApplication.desktop()
         self.move((desktop.width()-self.width())/2,(desktop.height()-self.height())/2)
+        self.callback = callback
         
     def proceed(self):
         if self.LoadGraph.isChecked():
-            result = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '/home')
+            self.callback('file')
         elif self.NewDirRB.isChecked():
-            result = 'a'
+            self.callback('dir')
         elif self.NewUndirRB.isChecked():
-            result = 'b'
+            self.callback('undir')
         else:
             QtGui.QMessageBox.question(self, 'Message',"Chose propriate radio button", QtGui.QMessageBox.Ok)
 
+class FinalWindow(QtGui.QWidget):
+
+    callback = None
+    currpixmap = None
+    
+    def __init__(self,names,callback,parent = None):
+        QtGui.QWidget.__init__(self, parent)
+        uic.loadUi("UIForms/VisRepr.ui",self)
+        self.connect(self.findPath, QtCore.SIGNAL("clicked()"),self.fPath)
+        self.setFixedSize(self.size())
+        desktop = QtGui.QApplication.desktop()
+        self.move((desktop.width()-self.width())/2,(desktop.height()-self.height())/2)
+        self.callback = callback
+        sc = QtGui.QGraphicsScene()
+        sc.addPixmap(QtGui.QPixmap('file.png'))
+        self.gview.setScene(sc)
+        self.gview.show()
+        self.gview.scale(0.5,0.5)
+        for i in names.keys():
+            self.first.insertItem(i,names[i])
+            self.last.insertItem(i,names[i])
+        
+
+    def fPath(self):
+        path,length = self.callback(self.first.currentIndex(),self.last.currentIndex())
+        QtGui.QMessageBox.question(self, 'Answer','Path:' + str(path) + ('\n Len:') + str(length), QtGui.QMessageBox.Ok)
+        sc = QtGui.QGraphicsScene()
+        sc.addPixmap(QtGui.QPixmap('file.png'))
+        self.gview.setScene(sc)
+        self.gview.show()
+        
+        
+        
+        
 
 class MakeGraphWin(QtGui.QWidget):
     __Nodes = None
@@ -100,11 +135,11 @@ class MakeGraphWin(QtGui.QWidget):
 
 if __name__ == "__main__":
 
-    def CbFunc():
-        print window.NodesAndMatrix()
-        
+    def CbFunc(first,last):
+        return (1,2),3
+    
     app = QtGui.QApplication(sys.argv)
-    window = MakeGraphWin(callback = CbFunc)
+    window = FinalWindow(names = {0:'a',1:'b',2:'c'},callback = CbFunc)
     window.show()
     sys.exit(app.exec_())
     
