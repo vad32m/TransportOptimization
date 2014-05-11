@@ -48,7 +48,7 @@ class FinalWindow(QtGui.QWidget): #window for visualizing graph and route search
             self.first.insertItem(i,names[i])
             self.last.insertItem(i,names[i])
         self._names = names
-
+    
     def fPath(self):
         path,length = self._callback(self.first.currentIndex(),self.last.currentIndex(),None)
         pth = '' + self._names[path[0][0]]
@@ -65,8 +65,11 @@ class FinalWindow(QtGui.QWidget): #window for visualizing graph and route search
         a.setAcceptMode(QtGui.QFileDialog.AcceptSave)
         self._callback(self.first.currentIndex(),self.last.currentIndex(),a.getOpenFileName(self, 'Save file', '/home'))
         
-        
-        
+    def wheelEvent(self,event):
+        if event.delta() > 0:
+            self.gview.scale(0.7,0.7)
+        else:
+            self.gview.scale(1.3,1.3)
 
 class MakeGraphWin(QtGui.QWidget):
     __Nodes = None
