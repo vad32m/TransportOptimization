@@ -49,7 +49,10 @@ class OrientedGraph:
         for name in names:
             self.__ndict[i] = name
             i = i + 1
-
+        
+    def Nodes(self):
+        return self.__ndict
+    
     def GetNodeId(self,name): #returns node id by name
         if name not in self.__ndict.values():
             raise InvalidArgError
@@ -93,8 +96,7 @@ class OrientedGraph:
         if (len(self.__ndict) == 0) or (len(self.__matrix) == 0):
             raise EmptyGraphError
         if firstnode == lastnode:
-            t = firstnode,lastnode
-            return t #the best way to get to node b from node b is to go nowhere
+            return ((firstnode,lastnode),) #the best way to get to node b from node b is to go nowhere
         distlist,parlist = self.DijkstraAlg(firstnode) #apply DijkstraAlgorythm
         if distlist[lastnode] == float('inf'): #cant gat to lastnode - error
             raise BadGraphError
@@ -109,7 +111,7 @@ class OrientedGraph:
                     break
             return tuple(route) #return the route
 
-    def VisualiseToFile(self,subgraph = (),fileloc = 'file.png',plasement = 'circo'):
+    def VisualiseToFile(self,subgraph = (),fileloc = 'CGraph.png',plasement = 'circo'):
         if (len(self.__ndict) == 0) or (len(self.__matrix) == 0):
             raise EmptyGraphError
         G = pgv.AGraph(strict=True,directed=True,forcelabels = True) #pyGraphVis makes magic simple
@@ -130,8 +132,9 @@ class OrientedGraph:
                 elif (self.__matrix[i][j] != 0):
                     G.add_edge(self.__ndict[i],self.__ndict[j],label = str(self.__matrix[i][j])) #not fetched out
         G.draw(fileloc,prog=plasement) #generate image
+        return
 
-    def WriteToFile(self,fileloc = 'graph.gro'):
+    def WriteToFile(self,fileloc):
         if (len(self.__ndict) == 0) or (len(self.__matrix) == 0):# nothing to write if graph is empty
             raise EmptyGraphError
         _file = open(fileloc,'w') #open file
@@ -148,8 +151,9 @@ class OrientedGraph:
                 _file.write(string)
             _file.write('\n')
         _file.close() #operating with finished
+        return
 
-    def ReadFromFile(self,fileloc = 'graph.gro'):
+    def ReadFromFile(self,fileloc):
         RowList = []
         CollumnList = []
         currstring = ''
@@ -185,6 +189,7 @@ class OrientedGraph:
                     raise CorruptedFileError
             self.__matrix = tuple( RowList)
             _file.close() #work finished
+        return
 
             
 class UnorientedGraph:
@@ -215,6 +220,10 @@ class UnorientedGraph:
         for name in names:
             self.__ndict[i] = name
             i = i + 1
+        return
+    
+    def Nodes(self):
+        return self.__ndict
 
     def GetNodeId(self,name): #returns node id by name
         if name not in self.__ndict.values():
@@ -233,6 +242,7 @@ class UnorientedGraph:
         for i in range(len(self.__matrix)):
             self.__matrix[i] = tuple(self.__matrix[i])
         self.__matrix = tuple(self.__matrix)
+        return
 
         
     def DijkstraAlg(self, point):
@@ -270,8 +280,7 @@ class UnorientedGraph:
         if (len(self.__ndict) == 0) or (len(self.__matrix) == 0):
             raise EmptyGraphError
         if firstnode == lastnode:
-            t = firstnode,lastnode
-            return t #the best way to get to node b from node b is to go nowhere
+            return ((firstnode,lastnode),) #the best way to get to node b from node b is to go nowhere
         distlist,parlist = self.DijkstraAlg(firstnode) #apply DijkstraAlgorythm
         if distlist[lastnode] == float('inf'): #cant gat to lastnode - error
             raise BadGraphError
@@ -286,7 +295,7 @@ class UnorientedGraph:
                     break
             return tuple(route) #return the route
 
-    def VisualiseToFile(self,subgraph = (),fileloc = 'file.png',plasement = 'circo'):
+    def VisualiseToFile(self,subgraph = (),fileloc = 'CGraph.png',plasement = 'circo'):
         if (len(self.__ndict) == 0) or (len(self.__matrix) == 0):
             raise EmptyGraphError
         G = pgv.AGraph(strict=True,directed=False,forcelabels = True) #pyGraphVis makes magic simple
@@ -307,8 +316,9 @@ class UnorientedGraph:
                 elif (self.__matrix[i][j] != 0):
                     G.add_edge(self.__ndict[i],self.__ndict[j],label = str(self.__matrix[i][j])) #not fetched out
         G.draw(fileloc,prog=plasement) #generate image
+        return
 
-    def WriteToFile(self,fileloc = 'graph.gru'):
+    def WriteToFile(self,fileloc):
         if (len(self.__ndict) == 0) or (len(self.__matrix) == 0):# nothing to write if graph is empty
             raise EmptyGraphError
         _file = open(fileloc,'w') #open file
@@ -325,8 +335,9 @@ class UnorientedGraph:
                 _file.write(string)
             _file.write('\n')
         _file.close() #operating with finished
+        return
 
-    def ReadFromFile(self,fileloc = 'graph.gru'):
+    def ReadFromFile(self,fileloc):
         RowList = []
         CollumnList = []
         currstring = ''
@@ -363,21 +374,7 @@ class UnorientedGraph:
             self.__matrix = tuple( RowList)
             self._CorrectMatrix()
             _file.close() #work finished
+        return
                 
             
         
-    
-
-
-    
-t1 = 0,1,0,0,0,1
-t2 = 1,0,0,1,0,1
-t3 = 1,0,0,0,0,1
-t4 = 1,0,0,0,0,0
-t5 = 0,0,0,1,0,1
-t6 = 0,0,1,0,1,0
-t = t1,t2,t3,t4,t5,t6
-
-names = 'New York','London','Bejing','Washington','Kyiv','Odessa'
-G = OrientedGraph(t,names)
-G.VisualiseToFile()
